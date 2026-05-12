@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env files
+*.local
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Debug/test artifacts
+test-results/
+screenshots/
+test_screenshots/
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
