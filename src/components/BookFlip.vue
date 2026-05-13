@@ -1017,7 +1017,6 @@ function addPage(pageNum: number) {
     const slotEl = slotChildren.value[numToIdx(pageNum)]
     if (slotEl) {
       const cloned = slotEl.cloneNode(true)
-      cloned.classList.add('turn-page-slot')
       el.appendChild(cloned)
     } else {
       const pg = props.pages?.[numToIdx(pageNum)]
