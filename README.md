@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/vue-turnjs-flip"><img src="https://img.shields.io/npm/v/vue-turnjs-flip.svg" alt="npm version"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/npm/l/vue-turnjs-flip.svg" alt="License"></a>
-  <a href="https://www.npmjs.com/package/vue-turnjs-flip"><img src="https://img.shields.io/npm/dt/vue-turnjs-flip.svg" alt="Downloads"></a>
+  <a href="https://github.com/zhiquan86/vue-turnjs-flip"><img src="https://img.shields.io/github/stars/zhiquan86/vue-turnjs-flip.svg?style=social" alt="Stars"></a>
 </p>
 
 <p align="center">
@@ -25,7 +25,7 @@
 - 📦 **轻量级** — 零运行时依赖，仅依赖 Vue 3
 - 🛠️ **TypeScript** — 完整类型定义
 - 📱 **响应式** — 自适应布局
-- 🎰 **插槽支持** — 使用默认插槽定义页面内容，支持任意复杂结构（类似 Swiper slider）
+- 🎰 **插槽 + BookFlipPage** — 类似 Swiper 的 `SwiperSlide`，只需引入一个组件即可使用
 
 ## 🙏 致谢 / Acknowledgments
 
@@ -55,30 +55,29 @@ npm install vue-turnjs-flip
 
 ## 🚀 快速开始
 
-### 方式一：插槽模式（推荐 ✅）
+### 方式一：BookFlipPage 模式（推荐 ✅）
 
-每个直接子元素就是一页，支持任意复杂的 HTML/Vue 组件：
+使用 `<BookFlipPage>` 标记每页边界，代码结构清晰，类似 Swiper 的 `SwiperSlide`：
 
 ```vue
 <template>
   <BookFlip v-model:current-page="currentPage">
-    <!-- 第 1 页：封面 -->
-    <div style="display:flex;align-items:center;justify-content:center;height:100%;">
+    <BookFlipPage>
+      <!-- 第 1 页 -->
       <h1>📖 我的书</h1>
-    </div>
+    </BookFlipPage>
 
-    <!-- 第 2 页：图文混排 -->
-    <div>
+    <BookFlipPage>
+      <!-- 第 2 页：图文混排 -->
       <h2>第一章</h2>
       <p>支持任意复杂的内容结构...</p>
       <img src="/cover.jpg" alt="" />
-    </div>
+    </BookFlipPage>
 
-    <!-- 第 3 页：使用 Vue 组件 -->
-    <MyCustomPage :data="pageData" />
-
-    <!-- 第 4 页 -->
-    <div>第四页内容</div>
+    <BookFlipPage>
+      <!-- 第 3 页：Vue 组件 -->
+      <MyCustomPage :data="pageData" />
+    </BookFlipPage>
   </BookFlip>
 </template>
 
@@ -90,6 +89,8 @@ import MyCustomPage from './MyCustomPage.vue'
 const currentPage = ref(0)
 </script>
 ```
+
+> 💡 **只需引入 `BookFlip` 一个组件**，`BookFlipPage` 会自动可用，无需单独 import。
 
 ### 方式二：Props 模式（简单场景）
 
@@ -108,7 +109,6 @@ const currentPage = ref(0)
 const pages = ref([
   { title: '第 1 页', content: '这里是第一页的内容...' },
   { title: '第 2 页', content: '这里是第二页的内容...' },
-  { title: '第 3 页', content: '这里是第三页的内容...' },
 ])
 </script>
 ```
@@ -132,26 +132,28 @@ app.mount('#app')
 
 | 属性 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `pages` | `Array<{ title?: string; content?: string }>` | `[]` | 页面数据数组，每项包含 title 和 content |
+| `pages` | `Array<{ title?: string; content?: string }>` | `[]` | 页面数据数组（Props 模式下使用） |
 | `currentPage` | `number` | `0` | 当前页码（v-model 双向绑定） |
+| `flipDuration` | `number` | `600` | 翻页动画时长 (ms) |
 
 ### Events
 
 | 事件 | 参数 | 说明 |
 |------|------|------|
 | `update:currentPage` | `(page: number)` | 页码变化时触发 |
-| `flip` | `(data: FlipData)` | 翻页动作触发时回调 |
+| `flip` | `(direction: 'next' \| 'prev')` | 翻页动作触发时回调 |
 
-### Slots
+### Slots / Components
 
-| 插槽名 | 说明 |
-|--------|------|
-| `default` | **默认插槽** — 每个直接子元素作为一页内容。支持任意 HTML、Vue 组件、图片等。优先级高于 `pages` prop。 |
+| 组件/插槽 | 说明 |
+|-----------|------|
+| `<BookFlip>` | 翻书容器组件 |
+| `<BookFlipPage>` | **页面标记组件**（类似 SwiperSlide），每个 `<BookFlipPage>` 代表一页。无需单独 import，随 `BookFlip` 自动注册。 |
 
 **使用规则：**
-- 当检测到默认插槽有子元素时，自动进入**插槽模式**，忽略 `pages` prop
-- 没有插槽子元素时，回退到 **Props 模式**（向后兼容）
-- 插槽内建议每页用 `<div>` 包裹（也可以是其他任意标签）
+- 使用 `<BookFlipPage>` 包裹每页内容时，自动进入**插槽模式**
+- 不传 `<BookFlipPage>` 且传入 `pages` prop 时，回退到 **Props 模式**
+- `<BookFlipPage>` 内部可以是任意 HTML、Vue 组件、图片等
 
 ## 🔧 开发
 
@@ -175,13 +177,14 @@ npm run preview
 vue-turnjs-flip/
 ├── src/
 │   ├── components/
-│   │   └── BookFlip.vue      # 核心翻书组件
-│   ├── index.ts               # 库入口（导出组件）
-│   └── main.ts                # 开发示例入口
-├── img/                       # 折痕阴影背景图
-│   ├── pages_01.png           # 左页（偶数页）阴影
-│   └── pages_02.png           # 右页（奇数页）阴影
-├── dist/                      # 构建输出
+│   │   ├── BookFlip.vue        # 核心翻书组件
+│   │   └── BookFlipPage.vue    # 页面标记子组件（无需单独引用）
+│   ├── index.ts                 # 库入口（导出组件）
+│   └── main.ts                  # 开发示例入口
+├── img/                          # 折痕阴影背景图
+│   ├── pages_01.png              # 左页（偶数页）阴影
+│   └── pages_02.png              # 右页（奇数页）阴影
+├── dist/                         # 构建输出
 ├── package.json
 ├── vite.config.ts
 └── README.md
