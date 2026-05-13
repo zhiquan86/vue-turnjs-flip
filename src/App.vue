@@ -71,7 +71,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import BookFlip from './components/BookFlip.vue'
-import BookFlipPage from './components/BookFlipPage.vue'
 
 const currentPage = ref(0)
 

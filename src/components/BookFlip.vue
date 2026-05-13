@@ -12,6 +12,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import BookFlipPage from './BookFlipPage.vue'
 
 const props = withDefaults(defineProps<{
   pages?: Array<{ title?: string; content?: string }>
