@@ -25,6 +25,7 @@
 - 📦 **轻量级** — 零运行时依赖，仅依赖 Vue 3
 - 🛠️ **TypeScript** — 完整类型定义
 - 📱 **响应式** — 自适应布局
+- 🎰 **插槽支持** — 使用默认插槽定义页面内容，支持任意复杂结构（类似 Swiper slider）
 
 ## 🙏 致谢 / Acknowledgments
 
@@ -54,7 +55,45 @@ npm install vue-turnjs-flip
 
 ## 🚀 快速开始
 
-### 基础用法
+### 方式一：插槽模式（推荐 ✅）
+
+每个直接子元素就是一页，支持任意复杂的 HTML/Vue 组件：
+
+```vue
+<template>
+  <BookFlip v-model:current-page="currentPage">
+    <!-- 第 1 页：封面 -->
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;">
+      <h1>📖 我的书</h1>
+    </div>
+
+    <!-- 第 2 页：图文混排 -->
+    <div>
+      <h2>第一章</h2>
+      <p>支持任意复杂的内容结构...</p>
+      <img src="/cover.jpg" alt="" />
+    </div>
+
+    <!-- 第 3 页：使用 Vue 组件 -->
+    <MyCustomPage :data="pageData" />
+
+    <!-- 第 4 页 -->
+    <div>第四页内容</div>
+  </BookFlip>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { BookFlip } from 'vue-turnjs-flip'
+import MyCustomPage from './MyCustomPage.vue'
+
+const currentPage = ref(0)
+</script>
+```
+
+### 方式二：Props 模式（简单场景）
+
+适合纯文本页面，向后兼容：
 
 ```vue
 <template>
@@ -70,7 +109,6 @@ const pages = ref([
   { title: '第 1 页', content: '这里是第一页的内容...' },
   { title: '第 2 页', content: '这里是第二页的内容...' },
   { title: '第 3 页', content: '这里是第三页的内容...' },
-  { title: '第 4 页', content: '这里是第四页的内容...' },
 ])
 </script>
 ```
@@ -106,7 +144,14 @@ app.mount('#app')
 
 ### Slots
 
-暂不支持插槽，页面内容通过 `pages` prop 的 `content` 字段渲染。
+| 插槽名 | 说明 |
+|--------|------|
+| `default` | **默认插槽** — 每个直接子元素作为一页内容。支持任意 HTML、Vue 组件、图片等。优先级高于 `pages` prop。 |
+
+**使用规则：**
+- 当检测到默认插槽有子元素时，自动进入**插槽模式**，忽略 `pages` prop
+- 没有插槽子元素时，回退到 **Props 模式**（向后兼容）
+- 插槽内建议每页用 `<div>` 包裹（也可以是其他任意标签）
 
 ## 🔧 开发
 

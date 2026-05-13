@@ -1,19 +1,20 @@
 <template>
   <div class="turn-book-wrap">
     <div ref="bookRef" class="turn-book"></div>
+    <div ref="slotContainer" style="display:none;position:absolute;visibility:hidden;pointer-events:none;"><slot /></div>
     <div class="nav-bar">
       <button class="nav-btn" :disabled="currentPage <= 0" @click="prevPage()">‹</button>
       <span class="pg-indicator">{{ currentPage + 1 }} / {{ totalPages }}</span>
-      <button class="nav-btn" :disabled="currentPage + 1 >= props.pages.length" @click="nextPage()">›</button>
+      <button class="nav-btn" :disabled="currentPage + 1 >= totalPages" @click="nextPage()">›</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 
 const props = withDefaults(defineProps<{
-  pages: Array<{ title?: string; content?: string }>
+  pages?: Array<{ title?: string; content?: string }>
   currentPage?: number
 }>(), { pages: () => [], currentPage: 0 })
 
@@ -176,6 +177,16 @@ function gradient(obj: HTMLElement, p0: Pt, p1: Pt, colors: [number, string][], 
 }
 
 const bookRef = ref<HTMLElement>()
+const slotContainer = ref<HTMLElement | null>(null)
+const slotChildren = ref<HTMLElement[]>([])
+
+function updateSlotChildren() {
+  if (slotContainer.value) {
+    slotChildren.value = Array.from(slotContainer.value.children) as HTMLElement[]
+  }
+}
+
+const useSlotMode = computed(() => slotChildren.value.length > 0)
 const currentPage = ref(props.currentPage)
 const isMobile = ref(false)
 const pw = ref(400)
@@ -202,7 +213,7 @@ const bookData: BookData = {
 const flipDataMap = new Map<number, FlipData>()
 
 const isSinglePage = computed(() => false)
-const totalPages = computed(() => props.pages.length)
+const totalPages = computed(() => useSlotMode.value ? slotChildren.value.length : (props.pages?.length ?? 0))
 
 function getView(pageNum?: number): number[] {
   const p = pageNum ?? bookData.page ?? currentPage.value + 1
@@ -972,7 +983,8 @@ function addMv(pageNum: number) {
 function addToDom() {
   const book = bookRef.value
   if (!book) return
-  for (let i = 0; i < props.pages.length; i++) {
+  const total = useSlotMode.value ? slotChildren.value.length : (props.pages?.length ?? 0)
+  for (let i = 0; i < total; i++) {
     addPage(i + 1)
   }
 }
@@ -1001,8 +1013,15 @@ function addPage(pageNum: number) {
 
     const el = document.createElement('div')
     el.className = `turn-page p${pageNum}${pageNum % 2 !== 0 ? ' odd' : ' even'}`
-    const pg = props.pages[numToIdx(pageNum)]
-    el.innerHTML = renderPageContent(pg, pageNum)
+
+    const slotEl = slotChildren.value[numToIdx(pageNum)]
+    if (slotEl) {
+      const cloned = slotEl.cloneNode(true)
+      el.appendChild(cloned)
+    } else {
+      const pg = props.pages?.[numToIdx(pageNum)]
+      el.innerHTML = renderPageContent(pg, pageNum)
+    }
     bookData.pageObjs[pageNum] = el
 
     _addPage(pageNum)
@@ -1548,7 +1567,7 @@ function rebuildAll() {
   bookData.tpage = null
   flipDataMap.clear()
 
-  bookData.totalPages = props.pages.length
+  bookData.totalPages = useSlotMode.value ? slotChildren.value.length : (props.pages?.length ?? 0)
   setDisplay(isSinglePage.value ? 'single' : 'double')
   
   addToDom()
@@ -1561,7 +1580,11 @@ function rebuildAll() {
 }
 
 watch(() => props.pages, () => {
-  rebuildAll()
+  if (!useSlotMode.value) rebuildAll()
+}, { deep: true })
+
+watch(slotChildren, () => {
+  if (useSlotMode.value) rebuildAll()
 }, { deep: true })
 
 watch(() => props.currentPage, (val) => {
@@ -1581,7 +1604,10 @@ watch(isMobile, () => {
 onMounted(() => {
   checkMobile()
   initLayout()
-  rebuildAll()
+  updateSlotChildren()
+  nextTick(() => {
+    rebuildAll()
+  })
 
   document.addEventListener(events.start, handleEventStart as EventListener, true)
   document.addEventListener(events.move, handleEventMove as EventListener)
