@@ -1662,16 +1662,32 @@ onUnmounted(() => {
   overflow: hidden;
 }
 :deep(.turn-page.odd) {
-  background-image: url(/img/pages_02.png);
-  background-position: left center;
-  background-size: auto 100%;
-  background-repeat: no-repeat;
+  background: #fff;
+}
+:deep(.turn-page.odd::after) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+  background: linear-gradient(to right, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.16) 1.5%, rgba(0,0,0,0.10) 3.5%, rgba(0,0,0,0.05) 6%, rgba(0,0,0,0.02) 9%, transparent 14%);
 }
 :deep(.turn-page.even) {
-  background-image: url(/img/pages_01.png);
-  background-position: right center;
-  background-size: auto 100%;
-  background-repeat: no-repeat;
+  background: #fff;
+}
+:deep(.turn-page.even::after) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+  background: linear-gradient(to left, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.16) 1.5%, rgba(0,0,0,0.10) 3.5%, rgba(0,0,0,0.05) 6%, rgba(0,0,0,0.02) 9%, transparent 14%);
 }
 :deep(.turn-shadow) {
   position: absolute;

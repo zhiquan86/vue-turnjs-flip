@@ -47,6 +47,8 @@
 npm install vue-turnjs-flip
 ```
 
+> ⚠️ **别忘了引入样式文件**：`import 'vue-turnjs-flip/style.css'`（详见下方使用示例）
+
 ### CDN
 
 ```html
@@ -84,6 +86,7 @@ npm install vue-turnjs-flip
 <script setup lang="ts">
 import { ref } from 'vue'
 import { BookFlip } from 'vue-turnjs-flip'
+import 'vue-turnjs-flip/style.css'
 import MyCustomPage from './MyCustomPage.vue'
 
 const currentPage = ref(0)
@@ -120,6 +123,7 @@ const pages = ref([
 import { createApp } from 'vue'
 import App from './App.vue'
 import VueTurnJsFlip from 'vue-turnjs-flip'
+import 'vue-turnjs-flip/style.css'
 
 const app = createApp(App)
 app.use(VueTurnJsFlip)
